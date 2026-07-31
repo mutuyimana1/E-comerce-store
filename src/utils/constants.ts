@@ -5,6 +5,6 @@ export const ENDPOINTS = {
   PRODUCTS: "/products",
   PRODUCT_BY_ID: (id: number | string) => `/products/${id}`,
   PRODUCT_SEARCH: "/products/search",
-  CATEGORY_LIST: "/products/category-list",
+  CATEGORIES: "/products/categories",
   PRODUCTS_BY_CATEGORY: (category: string) => `/products/category/${category}`,
 } as const;
