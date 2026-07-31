@@ -55,6 +55,7 @@ export interface CategoryItem {
   slug: string;
   name: string;
   url?: string;
+  image?: string;
 }
 
 export interface CartItemType {

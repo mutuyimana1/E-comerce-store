@@ -16,13 +16,10 @@ import NotFound from "./pages/not-found";
 export default function App() {
   return (
     <div className="min-h-screen bg-white text-zinc-900 flex flex-col font-sans antialiased selection:bg-black selection:text-white">
-      {/* Global Navigation Header */}
       <Navbar />
 
-      {/* Global Slide-Over Shopping Cart Drawer */}
       <CartDrawer />
 
-      {/* Main Content Body */}
       <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8">
         <Routes>
           <Route path="/" element={<Home />} />
@@ -37,7 +34,6 @@ export default function App() {
         </Routes>
       </main>
 
-      {/* Global Footer */}
       <Footer />
     </div>
   );

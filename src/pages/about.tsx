@@ -4,15 +4,15 @@ export default function About() {
   return (
     <div className="py-8 max-w-2xl mx-auto space-y-6 text-xs text-zinc-600">
       <div className="border-b border-zinc-200 pb-3">
-        <h1 className="text-xl font-bold text-black">About STUDIO.</h1>
+        <h1 className="text-xl font-bold text-black uppercase">About ECOMMERCE</h1>
       </div>
 
       <p className="leading-relaxed">
-        STUDIO is a minimalist online store focused on essential products across electronics, fashion, and home accessories.
+        ECOMMERCE offers quality products across electronics, apparel, and home essentials.
       </p>
 
       <p className="leading-relaxed">
-        We prioritize clear pricing, simple design, fast shipping, and zero clutter.
+        We prioritize transparent pricing, reliable shipping, and a fast shopping experience.
       </p>
 
       <div>

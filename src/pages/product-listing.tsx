@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { Filter, X, RotateCcw, ChevronDown, ChevronUp } from "lucide-react";
 import type { Product, CategoryItem } from "../types";
 import { fetchProducts, fetchCategories } from "../utils/api";
 import ProductGrid from "../components/product/product-grid";
@@ -12,6 +13,7 @@ import EmptyState from "../components/common/empty-state";
 import { useDebounce } from "../hooks/useDebounce";
 
 const LIMIT = 12;
+const INITIAL_CATEGORY_COUNT = 6;
 
 export default function ProductListing() {
   const [params, setParams] = useSearchParams();
@@ -20,6 +22,8 @@ export default function ProductListing() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  const [showAllCategories, setShowAllCategories] = useState(false);
 
   const queryParam = params.get("search") || "";
   const [searchTerm, setSearchTerm] = useState(queryParam);
@@ -70,11 +74,14 @@ export default function ProductListing() {
     loadData();
   }, [page, queryParam, selectedCat, sortBy, order]);
 
-  const handleCategoryChange = (slug: string) => {
+  const handleCategoryToggle = (slug: string) => {
     setParams((prev) => {
       const p = new URLSearchParams(prev);
-      if (slug) p.set("category", slug);
-      else p.delete("category");
+      if (selectedCat === slug) {
+        p.delete("category");
+      } else {
+        p.set("category", slug);
+      }
       p.set("page", "1");
       return p;
     });
@@ -95,74 +102,165 @@ export default function ProductListing() {
     });
   };
 
+  const resetAllFilters = () => {
+    setSearchTerm("");
+    setParams(new URLSearchParams());
+    setMobileFilterOpen(false);
+  };
+
   const totalPages = Math.ceil(total / LIMIT);
   const currentSortId = sortBy ? `${sortBy}-${order || "asc"}` : "default";
+  const hasActiveFilters = Boolean(selectedCat || queryParam || sortBy);
 
-  return (
-    <div className="py-6 space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-200 pb-4">
-        <div>
-          <h1 className="text-xl font-bold text-black capitalize">
-            {selectedCat ? selectedCat.replace(/-/g, " ") : "All Products"}
-          </h1>
-          <p className="text-xs text-zinc-500 mt-0.5">{total} items available</p>
-        </div>
+  const visibleCategories = showAllCategories
+    ? categories
+    : categories.slice(0, INITIAL_CATEGORY_COUNT);
 
-        <div className="flex flex-wrap items-center gap-2">
-          <select
-            value={selectedCat}
-            onChange={(e) => handleCategoryChange(e.target.value)}
-            className="px-2.5 py-2 bg-white border border-zinc-200 text-xs font-medium text-zinc-800 capitalize focus:outline-none focus:border-black"
-          >
-            <option value="">All Categories</option>
-            {categories.map((c) => (
-              <option key={c.slug} value={c.slug}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-
-          <SortDropdown currentSort={currentSortId} onSortChange={handleSortChange} />
-        </div>
-      </div>
-
-      <div className="max-w-xs">
+  const FilterContent = (
+    <div className="space-y-6 text-xs">
+      <div>
+        <h3 className="font-bold text-black uppercase tracking-wider mb-2">Search</h3>
         <SearchBar
           value={searchTerm}
           onChange={setSearchTerm}
-          placeholder="Filter catalog..."
+          placeholder="Search products..."
           onClear={() => setSearchTerm("")}
         />
       </div>
 
-      {loading ? (
-        <Loader />
-      ) : error ? (
-        <ErrorState message={error} onRetry={loadData} />
-      ) : products.length === 0 ? (
-        <EmptyState
-          onAction={() => {
-            setSearchTerm("");
-            setParams(new URLSearchParams());
-          }}
-        />
-      ) : (
-        <>
-          <ProductGrid products={products} />
-          <Pagination
-            currentPage={page}
-            totalPages={totalPages}
-            onPageChange={(p) => {
-              setParams((prev) => {
-                const updated = new URLSearchParams(prev);
-                updated.set("page", p.toString());
-                return updated;
-              });
-              window.scrollTo({ top: 0, behavior: "smooth" });
-            }}
-          />
-        </>
+      <div>
+        <div className="flex justify-between items-center mb-3">
+          <h3 className="font-bold text-black uppercase tracking-wider">Categories</h3>
+          {selectedCat && (
+            <button
+              onClick={() => handleCategoryToggle(selectedCat)}
+              className="text-[10px] text-zinc-400 hover:text-black"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          {visibleCategories.map((c) => {
+            const isChecked = selectedCat === c.slug;
+            return (
+              <label
+                key={c.slug}
+                className="flex items-center gap-2.5 cursor-pointer text-zinc-700 hover:text-black py-0.5 select-none"
+              >
+                <input
+                  type="checkbox"
+                  checked={isChecked}
+                  onChange={() => handleCategoryToggle(c.slug)}
+                  className="w-3.5 h-3.5 border-zinc-300 text-black focus:ring-0 accent-black cursor-pointer"
+                />
+                <span className={`capitalize ${isChecked ? "font-bold text-black" : "font-normal"}`}>
+                  {c.name}
+                </span>
+              </label>
+            );
+          })}
+        </div>
+
+        {categories.length > INITIAL_CATEGORY_COUNT && (
+          <button
+            onClick={() => setShowAllCategories(!showAllCategories)}
+            className="mt-3 text-xs font-semibold text-black hover:underline flex items-center gap-1"
+          >
+            {showAllCategories ? (
+              <>
+                Show less <ChevronUp className="w-3.5 h-3.5" />
+              </>
+            ) : (
+              <>
+                View all categories ({categories.length}) <ChevronDown className="w-3.5 h-3.5" />
+              </>
+            )}
+          </button>
+        )}
+      </div>
+
+      <div>
+        <h3 className="font-bold text-black uppercase tracking-wider mb-2">Sort By</h3>
+        <SortDropdown currentSort={currentSortId} onSortChange={handleSortChange} />
+      </div>
+
+      {hasActiveFilters && (
+        <button
+          onClick={resetAllFilters}
+          className="w-full flex items-center justify-center gap-1.5 py-2 text-zinc-700 bg-zinc-50 hover:bg-zinc-100 transition-colors"
+        >
+          <RotateCcw className="w-3.5 h-3.5" /> Reset Filters
+        </button>
       )}
+    </div>
+  );
+
+  return (
+    <div className="py-6 space-y-6">
+      <div className="flex justify-between items-end border-b border-zinc-100 pb-4">
+        <div>
+          <h1 className="text-xl font-bold text-black capitalize">
+            {selectedCat ? selectedCat.replace(/-/g, " ") : "Shop All"}
+          </h1>
+          <p className="text-xs text-zinc-500 mt-0.5">{total} products found</p>
+        </div>
+
+        <button
+          onClick={() => setMobileFilterOpen(true)}
+          className="lg:hidden flex items-center gap-1.5 px-3 py-1.5 bg-zinc-50 text-xs font-medium"
+        >
+          <Filter className="w-3.5 h-3.5" /> Filters
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+        <aside className="hidden lg:block lg:col-span-1 sticky top-20 space-y-6 max-h-[calc(100vh-6rem)] overflow-y-auto pr-2">
+          {FilterContent}
+        </aside>
+
+        {mobileFilterOpen && (
+          <div className="fixed inset-0 z-50 lg:hidden">
+            <div className="absolute inset-0 bg-black/40" onClick={() => setMobileFilterOpen(false)} />
+            <div className="fixed inset-y-0 left-0 max-w-xs w-full bg-white p-5 overflow-y-auto space-y-4">
+              <div className="flex justify-between items-center border-b border-zinc-100 pb-3">
+                <span className="font-bold text-xs uppercase text-black">Filter & Sort</span>
+                <button onClick={() => setMobileFilterOpen(false)} className="text-zinc-500">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              {FilterContent}
+            </div>
+          </div>
+        )}
+
+        <main className="lg:col-span-3 space-y-6">
+          {loading ? (
+            <Loader />
+          ) : error ? (
+            <ErrorState message={error} onRetry={loadData} />
+          ) : products.length === 0 ? (
+            <EmptyState onAction={resetAllFilters} />
+          ) : (
+            <>
+              <ProductGrid products={products} />
+              <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                onPageChange={(p) => {
+                  setParams((prev) => {
+                    const updated = new URLSearchParams(prev);
+                    updated.set("page", p.toString());
+                    return updated;
+                  });
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+              />
+            </>
+          )}
+        </main>
+      </div>
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { ShoppingBag, Menu, X } from "lucide-react";
 import { useCart } from "../../hooks/useCart";
+import NavSearch from "./nav-search";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -16,12 +17,12 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-zinc-200">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14">
-        <Link to="/" className="font-bold text-base tracking-tight text-zinc-900">
-          STUDIO.
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-14 gap-4">
+        <Link to="/" className="font-bold text-base tracking-tight text-zinc-900 uppercase flex-shrink-0">
+          ECOMMERCE.
         </Link>
 
-        <nav className="hidden sm:flex items-center space-x-6">
+        <nav className="hidden md:flex items-center space-x-6">
           {links.map((link) => (
             <NavLink
               key={link.path}
@@ -36,6 +37,10 @@ export default function Navbar() {
             </NavLink>
           ))}
         </nav>
+
+        <div className="hidden sm:block flex-grow max-w-xs mx-4">
+          <NavSearch />
+        </div>
 
         <div className="flex items-center gap-3">
           <button
@@ -53,7 +58,7 @@ export default function Navbar() {
 
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="sm:hidden p-1.5 text-zinc-700"
+            className="md:hidden p-1.5 text-zinc-700"
             aria-label="Menu"
           >
             {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -62,7 +67,11 @@ export default function Navbar() {
       </div>
 
       {isOpen && (
-        <div className="sm:hidden border-t border-zinc-200 bg-white px-4 py-3 space-y-2">
+        <div className="md:hidden border-t border-zinc-200 bg-white px-4 py-3 space-y-3">
+          <div className="pt-1 pb-2">
+            <NavSearch />
+          </div>
+
           {links.map((link) => (
             <NavLink
               key={link.path}
