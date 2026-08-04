@@ -9,6 +9,7 @@ import Loader from "../components/common/loader";
 import ErrorState from "../components/common/error-state";
 import { formatCurrency, calculateDiscountedPrice } from "../utils/format-currency";
 import { useCart } from "../hooks/useCart";
+import Landing from "../components/Landing";
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -71,7 +72,7 @@ export default function Home() {
 
   return (
     <div className="py-6 space-y-16">
-      <section className="py-8 sm:py-12 border-b border-zinc-100">
+      {/* <section className="py-8 sm:py-12 border-b border-zinc-100">
         <div className="max-w-3xl space-y-4">
           <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
             Catalog
@@ -98,11 +99,12 @@ export default function Home() {
             </Link>
           </div>
         </div>
-      </section>
+      </section> */}
+      <Landing/>
 
       <section className="space-y-4">
         <div className="flex justify-between items-end border-b border-zinc-100 pb-3">
-          <div>
+          <div> 
             <h2 className="text-sm font-bold text-black uppercase tracking-wider">
               Categories
             </h2>

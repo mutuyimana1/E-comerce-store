@@ -19,7 +19,7 @@ export default function Navbar() {
     <header className="sticky top-0 z-40 bg-white border-b border-zinc-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-14 gap-4">
         <Link to="/" className="font-bold text-base tracking-tight text-zinc-900 uppercase flex-shrink-0">
-          ECOMMERCE.
+          E-Store.
         </Link>
 
         <nav className="hidden md:flex items-center space-x-6">
