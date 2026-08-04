@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, CheckCircle ,Bed,Apple,Laptop} from 'lucide-react';
 import { Link } from 'react-router-dom';
