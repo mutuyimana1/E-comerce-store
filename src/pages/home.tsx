@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, ShoppingBag, Check } from "lucide-react";
+import { ShoppingBag, Check } from "lucide-react";
 import type { Product, CategoryItem } from "../types";
 import { fetchProducts, fetchCategories } from "../utils/api";
 import ProductGrid from "../components/product/product-grid";
