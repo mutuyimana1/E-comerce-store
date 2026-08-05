@@ -12,8 +12,10 @@ import ErrorState from "../components/common/error-state";
 import EmptyState from "../components/common/empty-state";
 import { useDebounce } from "../hooks/useDebounce";
 
-const LIMIT = 12;
+const INITIAL_LIMIT = 12;
 const INITIAL_CATEGORY_COUNT = 6;
+
+const LIMIT_OPTIONS = [12, 24, 50];
 
 export default function ProductListing() {
   const [params, setParams] = useSearchParams();
@@ -26,24 +28,37 @@ export default function ProductListing() {
   const [showAllCategories, setShowAllCategories] = useState(false);
 
   const queryParam = params.get("search") || "";
+  const selectedCat = params.get("category") || "";
+  const sortBy = params.get("sortBy") || "";
+  const order = (params.get("order") as "asc" | "desc") || undefined;
+  const limit = parseInt(params.get("limit") || String(INITIAL_LIMIT), 10) || INITIAL_LIMIT;
+  
+  const page = parseInt(params.get("page") || "1", 10) || 1;
+console.log(products,"products")
   const [searchTerm, setSearchTerm] = useState(queryParam);
   const debouncedSearch = useDebounce(searchTerm, 350);
 
-  const selectedCat = params.get("category") || "";
-  const page = parseInt(params.get("page") || "1", 10);
-  const sortBy = params.get("sortBy") || "";
-  const order = (params.get("order") as "asc" | "desc") || undefined;
+  useEffect(() => {
+    setSearchTerm(queryParam);
+  }, [queryParam]);
 
   useEffect(() => {
-    setParams((prev) => {
-      const p = new URLSearchParams(prev);
-      if (debouncedSearch) p.set("search", debouncedSearch);
-      else p.delete("search");
-      p.set("page", "1");
-      return p;
-    });
-  }, [debouncedSearch, setParams]);
+    
+    if (debouncedSearch !== queryParam) {
+      setParams((prev) => {
+        const p = new URLSearchParams(prev);
+        if (debouncedSearch.trim()) {
+          p.set("search", debouncedSearch.trim());
+        } else {
+          p.delete("search");
+        }
+        p.set("page", "1"); 
+        return p;
+      });
+    }
+  }, [debouncedSearch, setParams, queryParam]);
 
+  // CATEGORIES FETCH 
   useEffect(() => {
     fetchCategories().then(setCategories).catch(() => {});
   }, []);
@@ -52,9 +67,10 @@ export default function ProductListing() {
     setLoading(true);
     setError(null);
     try {
-      const skip = (page - 1) * LIMIT;
+     
+      const skip = (page - 1) * limit;
       const res = await fetchProducts({
-        limit: LIMIT,
+        limit,
         skip,
         q: queryParam,
         category: selectedCat,
@@ -72,7 +88,8 @@ export default function ProductListing() {
 
   useEffect(() => {
     loadData();
-  }, [page, queryParam, selectedCat, sortBy, order]);
+  }, [page, limit, queryParam, selectedCat, sortBy, order]);
+
 
   const handleCategoryToggle = (slug: string) => {
     setParams((prev) => {
@@ -102,13 +119,22 @@ export default function ProductListing() {
     });
   };
 
+  const handleLimitChange = (newLimit: number) => {
+    setParams((prev) => {
+      const p = new URLSearchParams(prev);
+      p.set("limit", String(newLimit));
+      p.set("page", "1");
+      return p;
+    });
+  };
+
   const resetAllFilters = () => {
     setSearchTerm("");
     setParams(new URLSearchParams());
     setMobileFilterOpen(false);
   };
 
-  const totalPages = Math.ceil(total / LIMIT);
+  const totalPages = Math.ceil(total / limit);
   const currentSortId = sortBy ? `${sortBy}-${order || "asc"}` : "default";
   const hasActiveFilters = Boolean(selectedCat || queryParam || sortBy);
 
@@ -199,14 +225,7 @@ export default function ProductListing() {
 
   return (
     <div className="py-6 space-y-6">
-      <div className="flex justify-between items-end border-b border-zinc-100 pb-4">
-        <div>
-          <h1 className="text-xl font-bold text-black capitalize">
-            {selectedCat ? selectedCat.replace(/-/g, " ") : "Shop All"}
-          </h1>
-          <p className="text-xs text-zinc-500 mt-0.5">{total} products found</p>
-        </div>
-
+      <div className="flex justify-between items-end pb-4">
         <button
           onClick={() => setMobileFilterOpen(true)}
           className="lg:hidden flex items-center gap-1.5 px-3 py-1.5 bg-zinc-50 text-xs font-medium"
@@ -245,6 +264,8 @@ export default function ProductListing() {
           ) : (
             <>
               <ProductGrid products={products} />
+               <div className="flex items-center justify-between">
+               
               <Pagination
                 currentPage={page}
                 totalPages={totalPages}
@@ -257,6 +278,24 @@ export default function ProductListing() {
                   window.scrollTo({ top: 0, behavior: "smooth" });
                 }}
               />
+                <div className="flex items-center gap-2">
+                  <label htmlFor="limit-select" className="text-xs text-zinc-500">
+                    Per page:
+                  </label>
+                  <select
+                    id="limit-select"
+                    value={limit}
+                    onChange={(e) => handleLimitChange(parseInt(e.target.value, 10))}
+                    className="text-xs border border-zinc-200 bg-white px-2 py-1 text-zinc-700 focus:outline-none focus:ring-1 focus:ring-black"
+                  >
+                    {LIMIT_OPTIONS.map((opt) => (
+                      <option key={opt} value={opt}>
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
             </>
           )}
         </main>

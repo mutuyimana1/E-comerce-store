@@ -12,7 +12,6 @@ export default function Navbar() {
   const links = [
     { label: "Shop", path: "/products" },
     { label: "Categories", path: "/categories" },
-    { label: "About", path: "/about" },
   ];
 
   return (

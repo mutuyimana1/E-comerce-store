@@ -10,7 +10,6 @@ import Categories from "./pages/categories";
 import CategoryProducts from "./pages/category-product";
 import Cart from "./pages/cart";
 import Checkout from "./pages/checkout";
-import About from "./pages/about";
 import NotFound from "./pages/not-found";
 
 export default function App() {
@@ -29,7 +28,6 @@ export default function App() {
           <Route path="/categories/:id" element={<CategoryProducts />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
-          <Route path="/about" element={<About />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>

@@ -1,4 +1,4 @@
-import type React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Star, Check } from "lucide-react";
 import type { Product } from "../../types";
@@ -7,6 +7,8 @@ import { useCart } from "../../hooks/useCart";
 
 export default function ProductCard({ product }: { product: Product }) {
   const { addToCart, items } = useCart();
+  const [isLoaded, setIsLoaded] = useState(false); // Tracks image download completion
+  
   const discountedPrice = calculateDiscountedPrice(product.price, product.discountPercentage);
   const inCart = items.some((i) => i.product.id === product.id);
 
@@ -17,16 +19,30 @@ export default function ProductCard({ product }: { product: Product }) {
 
   return (
     <div className="group flex flex-col justify-between h-full bg-white">
-      <Link to={`/products/${product.id}`} className="block relative bg-zinc-50 aspect-square p-4 overflow-hidden">
+      <Link to={`/products/${product.id}`} className="block relative bg-zinc-50 aspect-square p-4 overflow-hidden rounded-md">
+        
+        {/* SKELETON PLACEHOLDER: Shows only while isLoaded is false */}
+        {!isLoaded && (
+          <div className="absolute inset-0 bg-zinc-100 animate-pulse flex items-center justify-center">
+            {/* Minimalist central icon indicator */}
+            <div className="w-10 h-10 rounded bg-zinc-200/60" />
+          </div>
+        )}
+
+        {/* IMAGE COMPONENT: Fades in elegantly once loaded */}
         <img
           src={product.thumbnail}
           alt={product.title}
-          className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
           loading="lazy"
+          onLoad={() => setIsLoaded(true)}
+          className={`w-full h-full object-contain group-hover:scale-105 transition-all duration-500 ease-out ${
+            isLoaded ? "opacity-100 scale-100" : "opacity-0 scale-95"
+          }`}
         />
 
+        {/* Discount Badge */}
         {product.discountPercentage > 0 && (
-          <span className="absolute top-2 left-2 bg-black text-white text-[10px] font-semibold px-2 py-0.5">
+          <span className="absolute top-2 left-2 bg-black text-white text-[10px] font-semibold px-2 py-0.5 rounded-sm z-10">
             -{Math.round(product.discountPercentage)}%
           </span>
         )}
@@ -57,11 +73,11 @@ export default function ProductCard({ product }: { product: Product }) {
 
           <button
             onClick={handleAdd}
-            className={`text-xs px-3 py-1 font-medium transition-colors ${
+            className={`text-xs px-3 py-1 font-medium transition-colors rounded-md flex items-center justify-center min-w-[60px] ${
               inCart ? "bg-zinc-100 text-black hover:bg-zinc-200" : "bg-black text-white hover:bg-zinc-800"
             }`}
           >
-            {inCart ? <Check className="w-3.5 h-3.5 inline" /> : "Add"}
+            {inCart ? <Check className="w-3.5 h-3.5" /> : "Add"}
           </button>
         </div>
       </div>

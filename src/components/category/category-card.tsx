@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import type { CategoryItem } from "../../types";
 
 export default function CategoryCard({ category }: { category: CategoryItem }) {
+  console.log(category);
   return (
     <Link
       to={`/categories/${category.slug}`}

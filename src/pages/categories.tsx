@@ -29,7 +29,6 @@ export default function Categories() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-200 pb-4">
         <div>
           <h1 className="text-xl font-bold text-black">Categories</h1>
-          <p className="text-xs text-zinc-500 mt-0.5">{categories.length} categories available</p>
         </div>
 
         <div className="w-full sm:w-64">
